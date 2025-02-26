@@ -84,17 +84,7 @@ student_grades = {
     "felix_wagner": [72, 75, 70],
     "lena_hoffmann": [95, 89, 91]
 }
-def bubbleSort(array1,array2):
-    
-    n = len(array1)
 
-    for i in range(n):
-        for j in range(0, n - i - 1):
-
-            if array1[j] > array1[j + 1]:
-                array1[j], array1[j + 1] = array1[j + 1], array1[j]
-                array2[j], array2[j + 1] = array2[j + 1], array2[j]
-    return array1,array2
 for student in student_grades:
     print(f"{student} best grade: {max(student_grades[student])}. Average: {round(sum(student_grades[student]) / len(student_grades[student]),2)}")
 student = ''
