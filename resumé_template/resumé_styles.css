@@ -1,0 +1,42 @@
+div {
+    margin-right:0px; 
+    margin-left:75vw;
+    width: 20%
+}
+
+.ndiv {
+    margin-right:0px; 
+    margin-left:5vw;
+    width: 50%
+}
+
+.rdiv {
+    position:fixed;
+}
+
+p {
+    font-family: system-ui;
+    font-size: 12px;
+}
+
+h1, h2 , h3 {
+    color:#2b7c90;
+    font-family: system-ui;
+}
+
+.dates {
+    padding-left: 3%;
+    font-size:10px;
+    color: #484848
+}
+.description {
+    padding-right: 3%;
+}
+
+.conct {
+    font-weight: 500;
+}
+.underscore {
+    border-bottom: solid 2px #dddddd;
+    padding-top: 4px;
+}
