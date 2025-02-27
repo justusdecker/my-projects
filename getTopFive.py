@@ -7,14 +7,11 @@
 
 ©2025 Justus Decker - getTopFive
 """
-def getTop(grades: list[int]) -> list:
-    """
-    reverse
-    """
-    return sorted(grades,reverse=True)[:5]
-    
-def getWorst(grades: list[int]) -> list:
-    return sorted(grades)[:10]
+def getTop(grades: list[int],sort:bool,l:int=5) -> list:
+    "sort: True = top | False = bottom"
+    return sorted(grades,reverse=sort)[:l]
+
 grades = [14,51,52,63,64,2,52,68,94,34,99,64]
-print(getTop(grades))
-print(getWorst(grades))
+print(getTop(grades,True))
+
+print(getTop(grades,False,10))
