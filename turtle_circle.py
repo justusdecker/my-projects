@@ -1,7 +1,6 @@
 import turtle
 SNAKE = turtle.Turtle()
 
-from pytube import YouTube,Playlist
 """
 f: foreward
 r: rotate +> 0 right else left
