@@ -8,7 +8,7 @@
 ©2025 Justus Decker - getTopFive
 """
 def getTop(grades: list[int],sort:bool,l:int=5) -> list:
-    "sort: True = top | False = bottom"
+    "sort: True = top | False = bottom, l: length of return"
     return sorted(grades,reverse=sort)[:l]
 
 grades = [14,51,52,63,64,2,52,68,94,34,99,64]
