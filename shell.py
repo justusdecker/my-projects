@@ -67,4 +67,12 @@ for ws in websites:
         print(new_ws)
     splitted_ws = ws.split('.')
     print(splitted_ws[0].capitalize())
-        
+
+
+#Mini Challenge 3
+
+import random
+from random import randint
+print(dir(random))
+print(randint.__doc__,help(randint))
+print(randint(-15,15))
