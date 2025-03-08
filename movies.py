@@ -1,47 +1,13 @@
 from random import randint
 import pip
-pip.main(['install', "thefuzz"])
-from thefuzz import fuzz
+try:
+    from thefuzz import fuzz
+except Exception as E:
+    print("Module not found!")
+    pip.main(['install', "thefuzz"])
+finally:
+    from thefuzz import fuzz
 import matplotlib.pyplot as plt
-
-
-"""
-Living in a Movie
-You're now going to start your first project 🎊
-This exercise is the first step of the project. 
-In the upcoming units you'll take the code that you wrote here and extend it to support additional features.
-
-We're building a movie application. Your movie application will store movie names and their ratings.
-You will communicate with the user via a command line, i.e., you print information to the terminal and expect user input.
-Your application will support two types of commands:
-
-1. CRUD - Create, Read, Update, Delete
-
-Almost every application implements CRUD commands, since you want to add movies (Create), view the existing movies (Read), update movies (Update), and delete movies (Delete).
-You can read more about CRUD in this link, or just Google it.
-
-2. Analytics
-
-Analytics, such as getting the top-rated movie, the least-rated movie etc.
-
-Movie Data Structure
-
-You will store the movies in a dictionary, provided to you in the skeleton file movies.py. 
-ach key in the dictionary stores the movie name, and each value stores the movie’s rating.
-
-Menu
-
-When opening the application on the first time, your application should display a title of your application (for example, My Movies Database).
-After the title, a menu should be displayed with the different options in your applications. 
-Each menu item is printed with a number next to it. Then, the user is requested to enter a choice from the menu.
-
-©Masterschool //\\
-
-This is my work for a codio exam.
-©2025 - Justus Decker
-
-"""
-
 class MovieRank:
   def __init__(self):
     self.movies = {
@@ -56,42 +22,27 @@ class MovieRank:
       "Forrest Gump": 8.8,
       "Star Wars: Episode V": 8.7
   }
-  def iterateMovies(self,cb=None):
-      for key in self.movies:
-            if cb is not None:
-                cb(key)          
-  def iterateMoviesAndRatings(self,cb=None):
-      for key in self.movies:
-        if cb is not None:
-          cb(key,self.movies[key])
-  def getMovie(self,types:str):
-      _ret = []
-      if "m" in types:
-          _ret.append([i for i in self.movies])
-      if "r" in types:
-          _ret.append([self.movies[i] for i in self.movies])
-      return _ret
   def update(self,inp):
-    if inp == "1": #List Movies
+    if inp == "1":
       print(f"Movies in total: {len(self.movies)}")
-      print(f"{'Movie':<35} {'Rating'}")
-      self.iterateMoviesAndRatings(lambda x, y: print(f"{x:<35}: {y}"))
-
-    if inp == "2":  #Add Movie
+      print(f"{'Movie':<25} {'Rating':<7}")
+      for key in self.movies:
+        print(f"{key:<25} {self.movies[key]:<7}")
+    if inp == "2":
       title, rating =  getUserInputColorized("Movie title: "), int(getUserInputColorized("Movie rating: "))
       
       if title not in self.movies:
         self.movies[title] = rating
-    if inp == "3":  #Delete Movie
+    if inp == "3":
       title =  getUserInputColorized("Movie title: ")
       if title in self.movies:
         self.movies.pop(title)
-    if inp == "4":  #Update Movie
+    if inp == "4":
       title, rating =  getUserInputColorized("Movie title: "), int(getUserInputColorized("Movie rating: "))
       if title in self.movies:
         self.movies[title] = rating
-    if inp == "5":  #Stats
-      ratings = self.getMovie("r")[0]
+    if inp == "5":
+      ratings = [self.movies[i] for i in self.movies]
       median = ratings.copy()
       median.sort()
       median = median[len(median)//2]
@@ -107,33 +58,32 @@ class MovieRank:
             ratingW = self.movies[key]
     
       print(f"Average rating: {round(average,2)}. Median rating: {median}. Worst Rating: {worst} with {ratingW}/10. Best Rating: {best} with {ratingB}/10")
-    if inp == "6":  #Stats
+    if inp == "6":
         rndMovie = [i for i in self.movies][randint(0,len(self.movies)-1)]
         print(f"{rndMovie}: {self.movies[rndMovie]}")
-    if inp == "7":  #Search Movie
+    if inp == "7":
         value = getUserInputColorized("Search: ")
         if value in self.movies:
           print(self.movies[value])
         else:
           for movie in self.movies:
-            if fuzz.ratio(value.lower(),movie.lower()) > 50:
-              print(f"\033[0;33mDid you mean {movie}?\033[0m")
-              break
+            if fuzz.ratio(value,movie) > 85:
+              print(f"Did you mean {movie}?")
           else:
             print("\033[0;31mNo Results!\033[0m")
-    if inp == "8":  #Movie sorted by rating
+    if inp == "8":
         names, ratings = bubbleSort([self.movies[i] for i in self.movies],[i for i in self.movies])
         names.reverse()
         ratings.reverse()
-        for r, n in zip(names,ratings):
-            print(f"{n:<35}: {r}/10")
-    if inp == "9":  #Create rating histogram
+        for n, r in zip(names,ratings):
+            print(f"{n}: {r}/10")
+    if inp == "9":
       plt.hist([self.movies[i] for i in self.movies])
       plt.show() 
 def getUserInputColorized(msg):
-  _ = input(f"{msg}\033[1;32m")
+  _ret = input(f"{msg}\033[1;32m")
   print("\033[0m",end="")
-  return _
+  return _ret #!Bugfix: The value has to be an string not NoneType
 def bubbleSort(array1,array2):
     
     n = len(array1)
@@ -148,7 +98,7 @@ def bubbleSort(array1,array2):
 
 def main():
   while 1:
-    print("""
+    print("""\033[J
 ********** My Movies Database **********
 
 Menu:
@@ -162,8 +112,10 @@ Menu:
 8. Movies sorted by rating
 9. Create Rating Histogram 
     """)
+
     MR.update(getUserInputColorized("Enter choice 1-9: "))
     
+    getUserInputColorized("Press Enter to continue")
 
 
 if __name__ == "__main__":
