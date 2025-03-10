@@ -1,8 +1,11 @@
 from tkinter.filedialog import askdirectory
 import pygame as pg
 from os import listdir,mkdir,path,remove
+from json import load,dumps
+from ctypes import windll
 __version__ = "1.1"
-
+#LOAD SAVE
+#Fixed some issues if user deletes the data. The Program will not crash anymore
 class App:
     FPS = 20
     WIDTH = 1280
@@ -23,6 +26,22 @@ class App:
         
         self.fav_image = pg.transform.scale_by(pg.image.load('fav.png'),0.25)
         self.trash_image = pg.transform.scale_by(pg.image.load('trash.png'),0.25)
+    def load_config(self):
+        if path.isfile("config.json"):
+            with open("config.json") as fIn:
+                data = load(fIn)
+                self.files = data['files']
+                self.favfiles = data['favfiles']
+                self.deletefiles = data['deletefiles']
+                self.folder_structure = data['folder_structure']
+    def save_config(self):
+        with open("config.json","w") as fOut:
+            data = {}
+            data['files'] = self.files
+            data['favfiles'] = self.favfiles
+            data['deletefiles'] = self.deletefiles
+            data['folder_structure'] = self.folder_structure
+            fOut.write(dumps(data))
     def get_file_path_original(self):
         return f"{self.folder_structure}\\{self.files[self.image_pointer]}"
     def move_pointer(self,direction:int):
@@ -34,9 +53,11 @@ class App:
             self.image_pointer = len(self.files) - 1
         pg.display.set_caption(f'[{self.image_pointer+1}/{len(self.files)}] - [{self.get_file_path_original()}]')    
         if self.files:
-            
-            img = pg.image.load(self.get_file_path_original())
-
+            try:
+                img = pg.image.load(self.get_file_path_original())
+            except FileNotFoundError as FNFE:
+                print(FNFE)
+                img = pg.Surface((1,1))
             old_image_x, old_image_y = img.get_size()
             x , y = 1 , 1
             if old_image_x > self.WIDTH or old_image_x < self.WIDTH:
@@ -49,7 +70,11 @@ class App:
             print(old_image_x,old_image_y,x if x < y else y)
         else:
             self.current_image = pg.Surface((1,1))
-    
+    def msg_box(self):
+        msg_result = windll.user32.MessageBoxW(0, "Do you want to save your config?", __name__, 35) #6,7,2 YES, NO ,CANCEL
+        if msg_result == 6:
+            self.save_config()
+        return msg_result == 2
     def get_trash_or_fav(self):
         return (self.files[self.image_pointer] in self.deletefiles) - (self.files[self.image_pointer] in self.favfiles)
     
@@ -64,11 +89,18 @@ class App:
             data.append(self.files[self.image_pointer])
             
     def copy_paste(self,filepath_copy:str,filepath_paste:str):
-        with open(filepath_copy,"rb") as fIn:
-            with open(filepath_paste,"wb") as fOut:
-                fOut.write(fIn.read())
-        remove(filepath_copy)
-        
+        try:
+            with open(filepath_copy,"rb") as fIn:
+                with open(filepath_paste,"wb") as fOut:
+                    fOut.write(fIn.read())
+        except FileNotFoundError as FNFE:
+            print(FNFE)
+            return
+        try:
+            remove(filepath_copy)
+        except WindowsError as WE:
+            print(WE)
+
     def create_folder(self,filepath:str):
         if not path.isdir(filepath):
             mkdir(filepath)
@@ -117,7 +149,16 @@ class App:
                     if event.key == pg.K_BACKSPACE:
                         self.remove_from(self.favfiles)
                         self.add_to(self.deletefiles)
-                        
+                    if self.is_running:
+                        if event.key == pg.K_s and pg.key.get_pressed()[pg.K_LCTRL]:
+                            self.save_config()
+                        if event.key == pg.K_o and pg.key.get_pressed()[pg.K_LCTRL]:
+                            if not self.msg_box():
+                                self.load_config()
+                            
+                        if event.key == pg.K_n and pg.key.get_pressed()[pg.K_LCTRL]:
+                            if not self.msg_box():
+                                self = App()
                 if event.type == pg.QUIT:
                     pg.quit()
                     self.is_running = False
