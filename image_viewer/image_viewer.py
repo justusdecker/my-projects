@@ -1,86 +1,123 @@
-from tkinter import filedialog
+from tkinter.filedialog import askdirectory
 import pygame as pg
 from os import listdir,mkdir,path,remove
+__version__ = "1.1"
 
 class App:
+    FPS = 20
+    WIDTH = 1280
+    HEIGHT = 720
     def __init__(self) -> None:
-        self.WINDOW = pg.display.set_mode((1280,720))
+        self.WINDOW = pg.display.set_mode((self.WIDTH,self.HEIGHT))
+        self.CLK = pg.Clock()
+        
         self.image_pointer = 0
-        self.folder_structure = filedialog.askdirectory()
+        
+        self.folder_structure = askdirectory()
         self.files = [i for i in listdir(self.folder_structure) if i.lower().endswith('jpg') or i.lower().endswith('png')]
         self.deletefiles = []
         self.favfiles = []
+        
         self.move_pointer(0)
         self.is_running = True
+        
         self.fav_image = pg.transform.scale_by(pg.image.load('fav.png'),0.25)
         self.trash_image = pg.transform.scale_by(pg.image.load('trash.png'),0.25)
-        
+    def get_file_path_original(self):
+        return f"{self.folder_structure}\\{self.files[self.image_pointer]}"
     def move_pointer(self,direction:int):
+        
         self.image_pointer += direction
         if self.image_pointer < 0:
             self.image_pointer = 0
         if self.image_pointer > len(self.files) - 1:
             self.image_pointer = len(self.files) - 1
+        pg.display.set_caption(f'[{self.image_pointer+1}/{len(self.files)}] - [{self.get_file_path_original()}]')    
         if self.files:
-            print(self.folder_structure + "\\" + self.files[self.image_pointer])
-            img = pg.image.load(self.folder_structure + "\\" + self.files[self.image_pointer])
-            imgX, imgY = img.get_size()
-            aspect = 1
-            if imgX != 1280 and imgY != 720:
-                if imgX > 1280:
-                    aspect = 1280 / imgX
-                if imgY > 720:
-                    aspect = 720 / imgY
-            self.current_image = pg.transform.scale_by(img,aspect)
+            
+            img = pg.image.load(self.get_file_path_original())
+
+            old_image_x, old_image_y = img.get_size()
+            x , y = 1 , 1
+            if old_image_x > self.WIDTH or old_image_x < self.WIDTH:
+                x = self.WIDTH / old_image_x
+
+            if old_image_y > self.HEIGHT or old_image_y < self.HEIGHT:
+                y = self.HEIGHT / old_image_y
+
+            self.current_image = pg.transform.scale_by(img,x if x < y else y)
+            print(old_image_x,old_image_y,x if x < y else y)
         else:
             self.current_image = pg.Surface((1,1))
+    
+    def get_trash_or_fav(self):
+        return (self.files[self.image_pointer] in self.deletefiles) - (self.files[self.image_pointer] in self.favfiles)
+    
+    def remove_from(self,data:list):
+        "Add current Image shortpath to {data} - deletefiles or favfiles"
+        if self.files[self.image_pointer] in data:
+            data.remove(self.files[self.image_pointer])
+            
+    def add_to(self,data:list):
+        "Add current Image shortpath to {data} - deletefiles or favfiles"
+        if self.files[self.image_pointer] not in data:
+            data.append(self.files[self.image_pointer])
+            
+    def copy_paste(self,filepath_copy:str,filepath_paste:str):
+        with open(filepath_copy,"rb") as fIn:
+            with open(filepath_paste,"wb") as fOut:
+                fOut.write(fIn.read())
+        remove(filepath_copy)
+        
+    def create_folder(self,filepath:str):
+        if not path.isdir(filepath):
+            mkdir(filepath)
     def run(self):
         while self.is_running:
-            
             self.WINDOW.fill((0,0,0))
             self.WINDOW.blit(self.current_image,(640-(self.current_image.get_width()//2),0))
-            if (self.files[self.image_pointer] in self.deletefiles) - (self.files[self.image_pointer] in self.favfiles) == 1:
+            
+            
+            if self.get_trash_or_fav() == 1:
                 self.WINDOW.blit(self.trash_image,(0,0))
-            elif (self.files[self.image_pointer] in self.deletefiles) - (self.files[self.image_pointer] in self.favfiles) == -1:
+            elif self.get_trash_or_fav() == -1:
                 self.WINDOW.blit(self.fav_image,(0,0))
+            self.CLK.tick(20)
             pg.display.update()
+            
             for event in pg.event.get():
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_LEFT:
                         self.move_pointer(-1)
+                        
                     if event.key == pg.K_RIGHT:
                         self.move_pointer(1)
+                        
                     if event.key == pg.K_RETURN:
-                        if not path.isdir(f'{self.folder_structure}\\deleted\\'):
-                            mkdir(f'{self.folder_structure}\\deleted\\')
+                        
+                        self.create_folder(f'{self.folder_structure}\\deleted\\')
+                        self.create_folder(f'{self.folder_structure}\\fav\\')
+                            
                         for file in self.deletefiles:
-                            with open(f'{self.folder_structure}\\{file}',"rb") as fIn:
-                                with open(f'{self.folder_structure}\\deleted\\{file}',"wb") as fOut:
-                                    fOut.write(fIn.read())
-                            remove(f'{self.folder_structure}\\{file}')
-                        if not path.isdir(f'{self.folder_structure}\\fav\\'):
-                            mkdir(f'{self.folder_structure}\\fav\\')
+                            self.copy_paste(f'{self.folder_structure}\\{file}',f'{self.folder_structure}\\deleted\\{file}')
+ 
                         for file in self.favfiles:
-                            with open(f'{self.folder_structure}\\{file}',"rb") as fIn:
-                                with open(f'{self.folder_structure}\\fav\\{file}',"wb") as fOut:
-                                    fOut.write(fIn.read())
-                            remove(f'{self.folder_structure}\\{file}')
+                            self.copy_paste(f'{self.folder_structure}\\{file}',f'{self.folder_structure}\\fav\\{file}')
+                            
                         self.is_running = False
+                        
                     if event.key == pg.K_ESCAPE:
-                        if self.files[self.image_pointer] in self.deletefiles:
-                            self.deletefiles.remove(self.files[self.image_pointer])
-                        if self.files[self.image_pointer] not in self.favfiles:
-                            self.favfiles.remove(self.files[self.image_pointer])
+                        self.remove_from(self.deletefiles)
+                        self.remove_from(self.favfiles)
+                        
                     if event.key == pg.K_SPACE:
-                        if self.files[self.image_pointer] in self.deletefiles:
-                            self.deletefiles.remove(self.files[self.image_pointer])
-                        if self.files[self.image_pointer] not in self.favfiles:
-                            self.favfiles.append(self.files[self.image_pointer])
+                        self.remove_from(self.deletefiles)
+                        self.add_to(self.favfiles)
+                        
                     if event.key == pg.K_BACKSPACE:
-                        if self.files[self.image_pointer] in self.favfiles:
-                            self.favfiles.remove(self.files[self.image_pointer])
-                        if self.files[self.image_pointer] not in self.deletefiles:
-                            self.deletefiles.append(self.files[self.image_pointer])
+                        self.remove_from(self.favfiles)
+                        self.add_to(self.deletefiles)
+                        
                 if event.type == pg.QUIT:
                     pg.quit()
                     self.is_running = False
