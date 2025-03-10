@@ -3,7 +3,8 @@ import pygame as pg
 from os import listdir,mkdir,path,remove
 from json import load,dumps
 from ctypes import windll
-__version__ = "1.2"
+__version__ = "1.3"
+
 class App:
     FPS = 20
     WIDTH = 1280
@@ -14,10 +15,7 @@ class App:
         
         self.image_pointer = 0
         
-        self.folder_structure = askdirectory()
-        self.files = [i for i in listdir(self.folder_structure) if i.lower().endswith('jpg') or i.lower().endswith('png')]
-        self.deletefiles = []
-        self.favfiles = []
+        self.load_config()
         
         self.move_pointer(0)
         self.is_running = True
@@ -32,6 +30,11 @@ class App:
                 self.favfiles = data['favfiles']
                 self.deletefiles = data['deletefiles']
                 self.folder_structure = data['folder_structure']
+        else:
+            self.folder_structure = askdirectory()
+            self.files = [i for i in listdir(self.folder_structure) if i.lower().endswith('jpg') or i.lower().endswith('png')]
+            self.deletefiles = []
+            self.favfiles = []
     def save_config(self):
         with open("config.json","w") as fOut:
             data = {}
