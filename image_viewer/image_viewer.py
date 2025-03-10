@@ -4,8 +4,6 @@ from os import listdir,mkdir,path,remove
 from json import load,dumps
 from ctypes import windll
 __version__ = "1.2"
-#LOAD SAVE
-#Fixed some issues if user deletes the data. The Program will not crash anymore
 class App:
     FPS = 20
     WIDTH = 1280
