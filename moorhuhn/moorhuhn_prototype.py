@@ -4,7 +4,7 @@ from random import randint
 from time import time
 pg.mixer.init()
 pg.font.init()
-__version__ = "1.0"
+__version__ = "1.1"
 FOLDER = "bin\\"
 """
 (c)2025 Justus Decker - The Moorhuhn Project
@@ -14,9 +14,8 @@ The music was created in LMMS
 """
 """
 Method to functions
-all data in bin
-swipe to right and left: viewport
 """
+
 class Player:
     def __init__(self) -> None:
         self.max_ammo = 5
@@ -161,7 +160,9 @@ class Moorhuhn:
         
         if chicken_hit:
             pg.mixer.Sound(FOLDER + f"chicken_hit_{randint(0,3)}.mp3").play()
-
+        if chicken_hit > 1:
+            pg.mixer.Sound(FOLDER + "row.mp3").play()
+        
         self.draw_chicken_dead()
         
         self.draw_ammo()
@@ -180,10 +181,14 @@ class Moorhuhn:
             self.combo = 0
             self.last_chicken_hit = 0
         
+        if self.combo > 2 and self.last_actual_press and chicken_hit:
+            pg.mixer.Sound(FOLDER + "combo.mp3").play()
+        
+        
         self.last_actual_press = actual_press
         self.last_frame_mouse_press = mouse_press
         self.last_frame_mouse_r_press = mouse_r_press
-        
+        #If the timer reaches 0 return to menu and save new highscore
         self.timer -= self.delta_time
         if self.timer <= 0:
             self.highscores.append(self.player.points)
@@ -197,6 +202,7 @@ class Moorhuhn:
 
             dead_chicken[3][1] -= self.delta_time * (self.HEIGHT//2)
             self.render_numbers(f"{dead_chicken[5]}",dead_chicken[3])
+            
     def draw_chicken_alive(self,actual_press,mouse_pos):
         chicken_hit = 0
         for idx,chicken in enumerate(self.chicken):
@@ -211,6 +217,7 @@ class Moorhuhn:
             chicken.update(actual_press,*mouse_pos)
             self.WINDOW.blit(chicken.surface,chicken.position)
         return chicken_hit
+    
     def draw_ammo(self):
         for i in range(self.player.current_ammo):
             self.WINDOW.blit(self.ammo_surface,(i*self.ammo_surface.get_width(),self.HEIGHT-self.ammo_surface.get_height()))
