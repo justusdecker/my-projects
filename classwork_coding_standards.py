@@ -162,15 +162,6 @@ def bubble_sort(array1,array2):
     return array1,array2
 
 def get_word_frequency(file_path:str):
-    """
-    Analyze word frequency in a text file.
-    Args:
-        p (str): Path to the text file
-        n (int): Number of top frequent words to return
-    
-    Returns:
-        list: Top N most frequent words with their counts
-    """
     cache = {}
     data = []
     if path.isfile(file_path):
