@@ -1,5 +1,5 @@
 """
-(c) 2025 translated from [c code stuff\\main.c] to python
+(c) 2025 translated from [classworks\\classwork - other langs\\c\\main.c] to python
 """
 
 def compute_sum_normal(limit: int) -> int:

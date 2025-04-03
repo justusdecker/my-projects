@@ -1,4 +1,5 @@
 public class Main {
+    //rename the program to Main.java
     public static void main(String[] args) {
         boolean is_running = true;
         byte[][] grid = {{0,0,0},{0,0,0},{0,0,0}};
