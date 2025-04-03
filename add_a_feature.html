@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled Counter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f4f4f4;
+        }
+
+        #counterContainer {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #counter {
+            font-size: 2em;
+            margin: 20px;
+            display: inline-block;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.5em;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div id="counterContainer">
+    <button onclick="decrement()">-</button>
+    <span id="counter">0</span>
+    <button onclick="increment()">+</button>
+</div>
+
+<script>
+    let currentValue = 0;
+    function decrement() {
+        if (currentValue == 0) {
+            return
+        }
+        currentValue--;
+        updateDisplay();
+    }
+    function increment() {
+        currentValue++;
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('counter').innerText = currentValue;
+    }
+</script>
+
+</body>
+</html>

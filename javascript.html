@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Bug Fixing</title>
+</head>
+<body>
+    <input type="text" id="nameInput" placeholder="Enter your name">
+    <button id="greetButton">Greet</button>
+    <p id="greeting"></p>
+
+    <script>
+        document.getElementById("greetButton").addEventListener("click", function() {
+            let nameInput = document.getElementById("nameInput");
+            let greetingText = document.getElementById("greeting");
+            greetingText.innerText = "Hello, " + nameInput.value;
+        });
+    </script>
+</body>
+</html>
